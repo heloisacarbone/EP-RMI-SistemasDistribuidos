@@ -1,21 +1,17 @@
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PartRepository {
+public interface PartRepository extends Remote {
 
-	private List<Part> partsList;
+	List<Part> partsList = new ArrayList<Part>();
 	
-	public PartRepository() {
-		this.partsList = new ArrayList<Part>();
-	}
+	public Part getPart(int index);
 	
-	public Part getPart(int index){
-		return this.partsList.get(index);
-	}
+	public void AddPart(Part p);
 	
-	public void AddPart(Part p){
-		this.partsList.add(p);
-	}
+	//TODO: add funcoes
 	
 	//TODO: Put all RMI paths here to handle the repository functions
 	

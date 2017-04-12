@@ -1,6 +1,7 @@
+
 import java.util.List;
 
-public class Part{
+public class Part {
 	
 	private int uid;
 	private String name;
