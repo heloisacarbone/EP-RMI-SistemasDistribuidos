@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface PartRepository extends Remote {
-	
-	List<Part> partsList = new ArrayList<Part>();
-	
 	public Part getPart(int index) throws RemoteException;
 	
 	public void AddPart(Part p) throws RemoteException;
