@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface PartRepository extends Remote {
-
+	
 	List<Part> partsList = new ArrayList<Part>();
 	
-	public Part getPart(int index);
+	public Part getPart(int index) throws RemoteException;
 	
-	public void AddPart(Part p);
+	public void AddPart(Part p) throws RemoteException;
+	
+	public void setServerName (String n) throws RemoteException;
+	
+	public String getServerName () throws RemoteException;
 	
 	//TODO: add funcoes
 	
