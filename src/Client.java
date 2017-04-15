@@ -18,6 +18,7 @@ public class Client {
 	        	String host = (args.length < 1) ? null : args[0];
 	            Registry registry = LocateRegistry.getRegistry(host);
 	            PartRepository stub = (PartRepository) registry.lookup(serverName);
+	            
 	            String response = stub.getServerName();
 	            System.out.println("response: " + response);
 	        } catch (Exception e) {
