@@ -13,8 +13,15 @@ public class Server implements PartRepository{
 	}
 	
 	@Override
-	public Part getPart(int index) {
-		return partsList.get(index);
+	public Part getPartByUID(int uid) throws RemoteException {
+		Part r = null;
+		for (Part p :  this.partsList) {
+			if (p.getUid() == uid) {
+				r = p;
+			}
+		}
+		
+		return r;
 	}
 
 	@Override
@@ -31,5 +38,18 @@ public class Server implements PartRepository{
 	public String getServerName() throws RemoteException {
 		return this.serverName;
 	}
+
+	@Override
+	public int getPartsLength() throws RemoteException {
+		return this.partsList.size();
+	}
+
+	@Override
+	public List<Part> getPartsList(String n) throws RemoteException {
+		return this.partsList;
+	}
+
+
+	
 
 }
