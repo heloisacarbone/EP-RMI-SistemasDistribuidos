@@ -45,7 +45,7 @@ public class Server implements PartRepository{
 	}
 
 	@Override
-	public List<Part> getPartsList(String n) throws RemoteException {
+	public List<Part> getPartsList() throws RemoteException {
 		return this.partsList;
 	}
 

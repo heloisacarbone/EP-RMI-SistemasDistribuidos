@@ -14,7 +14,7 @@ public interface PartRepository extends Remote {
 	public String getServerName () throws RemoteException;
 	
 	// Retorna a lista de peças
-	public List<Part> getPartsList (String n) throws RemoteException;
+	public List<Part> getPartsList () throws RemoteException;
 	
 	// Retorna o número de peças no server 
 	public int getPartsLength () throws RemoteException;
