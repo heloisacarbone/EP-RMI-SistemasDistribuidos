@@ -1,5 +1,6 @@
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Part implements Serializable{
@@ -7,7 +8,7 @@ public class Part implements Serializable{
 	private int uid;
 	private String name;
 	private String description;
-	private List<Part> subParts;
+	private ArrayList<Part> subParts;
 	
 	public Part(int uid, String name, String description) {
 		super();
@@ -45,11 +46,11 @@ public class Part implements Serializable{
 		this.description = description;
 	}
 
-	public List<Part> getSubParts() {
+	public ArrayList<Part> getSubParts() {
 		return subParts;
 	}
 
-	public void setSubParts(List<Part> subParts) {
+	public void setSubParts(ArrayList<Part> subParts) {
 		this.subParts = subParts;
 	}
 }

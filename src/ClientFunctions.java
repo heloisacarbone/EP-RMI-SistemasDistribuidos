@@ -1,6 +1,7 @@
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -8,26 +9,35 @@ public class ClientFunctions {
 	
 	private PartRepository currentServer;
 	private Part currentPart;
-	private List<Part> currentSubParts;
+	private ArrayList<Part> currentSubParts;
 	private Scanner s;
 	
 	public ClientFunctions(Scanner scanner) {
 		this.s = scanner;
+		this.currentSubParts = new ArrayList<Part>();
 	};
 	
 	public boolean commandRouter(String cmd) {
-		// TODO: Acrescentar as funcoes que sao necessarias para ter todos os checks prontos
+		String [] fullCommand = cmd.split(" ");
+		String [] args = null;
+		
+		if(fullCommand.length > 1){
+			args = fullCommand;
+		}
+		
+		cmd = fullCommand[0];
+		
 		switch(cmd.toLowerCase()) {
 			case "help":
 				return help();
 			case "bind":
-				return bind();
-			case "serverName":
+				return bind(args);
+			case "servername":
 				return serverName();
 			case "listp":
 				return listp();
 			case "getp":
-				return getp();
+				return getp(args);
 			case "showp":
 				return showp();
 			case "clearlist":
@@ -35,7 +45,9 @@ public class ClientFunctions {
 			case "addsubpart":
 				return addsubpart();
 			case "addp":
-				return addp();
+				return addp(args);
+			case "listsubp":
+				return listsubp(args);
 			case "quit":
 				return false;
 			default:
@@ -49,22 +61,28 @@ public class ClientFunctions {
 		// TODO: Ta escrito que essa lista esta incompleta na descricao
 		System.out.printf(
 			"Os comandos disponiveis para acesso: \n" +
-			"\t bind - Conectar com um server ou mudar de server  \n" +
+			"\t bind [nome do server] - Conectar com um server ou mudar de server  \n" +
 			"\t serverName - Mostra o nome do servidor que esta conectado  \n" +
 			"\t listp - Lista as pecas do repositorio corrente  \n" +
 			"\t getp - Busca uma peca por codigo  \n" +
 			"\t showp - Mostra atributos da peca corrente  \n" +
 			"\t clearlist - Esvazia a lista de subpecas corrente  \n" +
-			"\t addsubpart - Adiciona a� lista de subpecas corrente n unidades da peca corrente  \n" +
-			"\t addp - Adiciona uma peca ao repositorio corrente. A lista de subpecas correntes e usada como lista de subcomponentes diretos da nova peca \n" +
+			"\t addsubpart - Adiciona a lista de subpecas corrente n unidades da peca corrente  \n" +
+			"\t addp [nome] [descricao] [primitiva (sim/nao)] - Adiciona uma peca ao repositorio corrente. A lista de subpecas correntes e usada como lista de subcomponentes diretos da nova peca \n" +
 			"\t quit - Encerra a execucao do cliente"
 		);
 		return true;
 	}
 
-	private boolean bind() {
-		System.out.println("Deseja se conectar com qual server?");
-    	String serverName = this.s.nextLine();
+	private boolean bind(String [] args) {
+		String serverName = "";
+		if(args == null || args.length == 1){
+			System.out.println("Deseja se conectar com qual server?");
+			serverName = this.s.nextLine();
+		} else {
+			serverName = args[1];
+		}
+		
 		try {
             Registry registry = LocateRegistry.getRegistry();
             PartRepository stub = (PartRepository) registry.lookup(serverName);
@@ -79,24 +97,90 @@ public class ClientFunctions {
 		return true;
 	}
 	
-	private boolean addp() {
+	private boolean listsubp(String [] args){
+		int id = -1;
 		
-		System.out.println("Por favor, digite o nome da nova peca primitiva:");
-		String name = this.s.nextLine();
-		
-		System.out.println("Agora, digite a descricao da nova peca " + name + ":");
-		String description = this.s.nextLine();
+		if(args.length > 1) {
+			try{
+				id = Integer.parseInt(args[1]);
+			} catch(NumberFormatException ex){
+				System.err.println("Argumento UID invalido!");
+				return false;
+			}
+		} else {
+			System.out.println("Qual peca deseja buscar ? (id)");
+			while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
+	    	id = this.s.nextInt();
+		}
 		
 		try {
-			Part p = this.currentServer.AddPart(name, description);
-			System.out.println("Peca " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());
-			return true;
+			Part part = this.currentServer.getPartByUID(id);
+			ArrayList<Part> subParts = part.getSubParts();
+			
+			if(subParts.isEmpty()){
+				System.out.println("A peca " + part.getName() + " nao possui subpecas");
+			} else {
+				System.out.println("Peca " + part.getName() + ":");
+				System.out.println("id      |     nome     |      descricao   ");
+				for (Part p : subParts) {
+					String info = p.getUid()  +  "    |    " + p.getName() +  "    |    " + p.getDescription();
+					System.out.println(info);
+				}
+			}
+			
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
 			return false;
 		}
 		
+		return true;
+	}
+	
+	private boolean addp(String [] args) {
+		
+		String name = "";
+		
+		if(args.length > 1){
+			name = args[1];
+		} else {
+			System.out.println("Por favor, digite o nome da nova peca primitiva:");
+			name = this.s.nextLine();
+		}
+		
+		String description = "";
+		if(args.length > 2) {
+			description = args[2];
+		} else {
+			System.out.println("Digite a descricao da nova peca " + name + ":");
+			description = this.s.nextLine();	
+		}
+		
+		String primitive = "";
+		if(args.length > 3){
+			primitive = args[3];
+		} else {
+			System.out.println("A peca " + name + " eh primitiva?");
+			primitive = this.s.nextLine();
+		}
+
+		try {
+			Part p = this.currentServer.AddPart(name, description);
+			if(primitive.toLowerCase().contains("sim")) {
+				System.out.println("Peca primitiva " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());
+			} else {
+				if(this.currentSubParts.size() == 0) {
+					System.out.println("Voce nao tem pecas a serem adicionadas como subpecas. Peca adicionada no repositorio sem subpecas.");
+				} else {
+					this.currentServer.AddSubParts(p, this.currentSubParts);
+					System.out.println("Peca com subpecas " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());	
+				}
+			}
+			return true;
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return false;
+		}	
 	}
 
 	private boolean addsubpart() {
@@ -133,12 +217,24 @@ public class ClientFunctions {
 		return true;
 	}
 
-	private boolean getp() {
+	private boolean getp(String [] args) {
 		boolean stillSearch = true;
 		while (stillSearch) {
-			System.out.println("Qual peca deseja buscar ? (id)");
-			while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
-	    	int id = this.s.nextInt();
+			int id = -1;
+			if(args.length > 1){
+				try{
+					id = Integer.parseInt(args[1]);	
+				} catch (NumberFormatException ex){
+					System.err.println("Argumento UID invalido!");
+					return false;
+				}
+				
+			} else {
+				System.out.println("Qual peca deseja buscar ? (id)");
+				while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
+		    	id = this.s.nextInt();	
+			}
+			
 			try {
 	            this.currentPart = this.currentServer.getPartByUID(id);
 	            if (this.currentPart == null) {
@@ -162,6 +258,7 @@ public class ClientFunctions {
 	            	}
 	            } else {
 	            	System.out.println("A peca corrente e " + this.currentPart.getName());
+	            	this.currentSubParts.add(this.currentPart);
 	            	stillSearch = false;
 	            }
 	            
@@ -187,8 +284,7 @@ public class ClientFunctions {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }
-		
+	
 		return true;
 	}
-
 }

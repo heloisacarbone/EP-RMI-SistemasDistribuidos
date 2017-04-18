@@ -7,8 +7,7 @@ import java.util.Scanner;
 //Main do server
 //Rodar rmiregistry dentro da pasta /bin do projeto para subir o rmi
 public class Server {
-	public static void main(String [] args){
-		
+	public static void main(String [] args){	
 		System.out.println("Digite o nome do servidor");
 		startServer();
 	}

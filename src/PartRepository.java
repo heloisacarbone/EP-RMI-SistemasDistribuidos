@@ -1,11 +1,14 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface PartRepository extends Remote {
 	public Part getPartByUID(int index) throws RemoteException;
 	
 	public Part AddPart(String name, String description) throws RemoteException;
+	
+	public Part AddSubParts(Part parent, ArrayList<Part> subParts) throws RemoteException;
 	
 	// Nomeia o server
 	public void setServerName (String n) throws RemoteException;

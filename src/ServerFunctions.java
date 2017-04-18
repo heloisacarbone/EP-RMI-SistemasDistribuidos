@@ -9,7 +9,6 @@ public class ServerFunctions implements PartRepository{
 	
 	public ServerFunctions() {
 		partsList = new ArrayList<Part>();
-		
 	}
 	
 	@Override
@@ -32,6 +31,13 @@ public class ServerFunctions implements PartRepository{
 	}
 
 	@Override
+	public Part AddSubParts(Part parent, ArrayList<Part> subParts)
+			throws RemoteException {
+		parent.setSubParts(subParts);
+		return parent;
+	}
+	
+	@Override
 	public void setServerName(String n) throws RemoteException {
 		this.serverName = n;
 	}
@@ -50,8 +56,4 @@ public class ServerFunctions implements PartRepository{
 	public List<Part> getPartsList() throws RemoteException {
 		return this.partsList;
 	}
-
-
-	
-
 }

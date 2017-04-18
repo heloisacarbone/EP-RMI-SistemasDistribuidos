@@ -14,5 +14,4 @@ public class Client {
 	    		repeatS = c.commandRouter(command);
 	    	}
 	    }
-
 }
