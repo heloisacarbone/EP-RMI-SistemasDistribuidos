@@ -1,55 +1,38 @@
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
+import java.rmi.AlreadyBoundException;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Scanner;
 
-public class Server implements PartRepository{
-
-	private String serverName;
-	private List<Part> partsList;
-	
-	public Server() {
-		partsList = new ArrayList<Part>();
+//Main do server
+//Rodar rmiregistry dentro da pasta /bin do projeto para subir o rmi
+public class Server {
+	public static void main(String [] args){
 		
+		System.out.println("Digite o nome do servidor");
+		startServer();
 	}
-	
-	@Override
-	public Part getPartByUID(int uid) throws RemoteException {
-		Part r = null;
-		for (Part p :  this.partsList) {
-			if (p.getUid() == uid) {
-				r = p;
-			}
-		}
+
+	private static void startServer() {
+		Scanner s = new Scanner(System.in);
+		String serverName = s.nextLine();
 		
-		return r;
-	}
-
-	@Override
-	public void AddPart(Part p) {
-		this.partsList.add(p);
-	}
-
-	@Override
-	public void setServerName(String n) throws RemoteException {
-		this.serverName = n;
-	}
-
-	@Override
-	public String getServerName() throws RemoteException {
-		return this.serverName;
-	}
-
-	@Override
-	public int getPartsLength() throws RemoteException {
-		return this.partsList.size();
-	}
-
-	@Override
-	public List<Part> getPartsList() throws RemoteException {
-		return this.partsList;
-	}
-
-
-	
-
+		try {
+            ServerFunctions obj = new ServerFunctions();
+            PartRepository stub = (PartRepository) UnicastRemoteObject.exportObject(obj, 0);
+           
+            Registry registry = LocateRegistry.getRegistry();
+            registry.bind(serverName, stub);
+            stub.setServerName(serverName);
+            System.err.println("Server " + serverName + " ready");
+        }
+		catch(AlreadyBoundException ex) {
+        	System.out.println("Nome de servidor ja existe. Por favor, utilize um nome de servidor diferente");
+        	startServer();
+        }
+		catch (Exception e) {
+            System.err.println("Server exception: " + e.toString());
+            e.printStackTrace();
+        }
+	}	
 }

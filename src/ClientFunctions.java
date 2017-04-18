@@ -1,3 +1,4 @@
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ClientFunctions {
 			"\t getp - Busca uma peca por codigo  \n" +
 			"\t showp - Mostra atributos da peca corrente  \n" +
 			"\t clearlist - Esvazia a lista de subpecas corrente  \n" +
-			"\t addsubpart - Adiciona a  lista de subpecas corrente n unidades da peca corrente  \n" +
+			"\t addsubpart - Adiciona aï¿½ lista de subpecas corrente n unidades da peca corrente  \n" +
 			"\t addp - Adiciona uma peca ao repositorio corrente. A lista de subpecas correntes e usada como lista de subcomponentes diretos da nova peca \n" +
 			"\t quit - Encerra a execucao do cliente"
 		);
@@ -79,8 +80,23 @@ public class ClientFunctions {
 	}
 	
 	private boolean addp() {
-		// TODO Auto-generated method stub
-		return true;
+		
+		System.out.println("Por favor, digite o nome da nova peca primitiva:");
+		String name = this.s.nextLine();
+		
+		System.out.println("Agora, digite a descricao da nova peca " + name + ":");
+		String description = this.s.nextLine();
+		
+		try {
+			Part p = this.currentServer.AddPart(name, description);
+			System.out.println("Peca " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());
+			return true;
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 
 	private boolean addsubpart() {
@@ -94,7 +110,11 @@ public class ClientFunctions {
 	}
 
 	private boolean showp() {
-		// TODO Auto-generated method stub
+		System.out.println("*********Dados da peca corrente*********");
+		System.out.println("UID: " + this.currentPart.getUid());
+		System.out.println("Nome: " + this.currentPart.getName());
+		System.out.println("Descricao: " + this.currentPart.getDescription());
+		System.out.println("****************************************");
 		return true;
 	}
 

@@ -5,7 +5,7 @@ import java.util.List;
 public interface PartRepository extends Remote {
 	public Part getPartByUID(int index) throws RemoteException;
 	
-	public void AddPart(Part p) throws RemoteException;
+	public Part AddPart(String name, String description) throws RemoteException;
 	
 	// Nomeia o server
 	public void setServerName (String n) throws RemoteException;

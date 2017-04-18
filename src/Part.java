@@ -1,7 +1,8 @@
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Part {
+public class Part implements Serializable{
 	
 	private int uid;
 	private String name;
@@ -11,6 +12,11 @@ public class Part {
 	public Part(int uid, String name, String description) {
 		super();
 		this.uid = uid;
+		this.name = name;
+		this.description = description;
+	}
+	
+	public Part(String name, String description){
 		this.name = name;
 		this.description = description;
 	}
