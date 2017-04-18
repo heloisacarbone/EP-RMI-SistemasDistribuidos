@@ -33,7 +33,8 @@ public class ServerFunctions implements PartRepository{
 	@Override
 	public Part AddSubParts(Part parent, ArrayList<Part> subParts)
 			throws RemoteException {
-		parent.setSubParts(subParts);
+		getPartByUID(parent.getUid()).setSubParts(subParts);
+		System.out.println("FROM SERVER: " + subParts.size());
 		return parent;
 	}
 	
