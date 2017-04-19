@@ -1,4 +1,5 @@
 package server;
+import java.net.MalformedURLException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -22,5 +23,8 @@ public interface PartRepository extends Remote {
 	
 	// Retorna o número de peças no server 
 	public int getPartsLength () throws RemoteException;
+	
+	// Retorna uma lista com o nome dos servers
+	public String[] getServersList () throws RemoteException, MalformedURLException;
 	
 }

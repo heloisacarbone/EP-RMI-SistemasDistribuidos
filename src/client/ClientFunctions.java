@@ -1,5 +1,6 @@
 package client;
 
+import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -57,6 +58,8 @@ public class ClientFunctions {
 				return help();
 			case "bind":
 				return bind(splittedCommand);
+			case "listservers":
+				return listServers();
 			case "servername":
 				return serverName();
 			case "listp":
@@ -82,6 +85,20 @@ public class ClientFunctions {
 		
 	}
 	
+	private boolean listServers() {
+		try {
+			String [] servers = this.currentServer.getServersList();
+			System.out.println("Os servidores disponíveis");
+			for (String s : servers) {
+				System.out.println(s);
+			}
+		} catch (Exception e) {
+			System.err.println("Client exception: " + e.toString());
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	/**
 	 * Imprime na tela para o usuario as descricoes dos comandos aceitos pelo programa
 	 * */
@@ -91,6 +108,7 @@ public class ClientFunctions {
 			"\t bind [nome do server] - Conectar com um server ou mudar de server  \n" +
 			"\t serverName - Mostra o nome do servidor que esta conectado  \n" +
 			"\t listp - Lista as pecas do repositorio corrente  \n" +
+			"\t listservers - Lista os nomes dos servers \n" +
 			"\t getp [ID da peca] - Busca uma peca por codigo  \n" +
 			"\t showp - Mostra atributos da peca corrente  \n" +
 			"\t clearlist - Esvazia a lista de subpecas corrente  \n" +

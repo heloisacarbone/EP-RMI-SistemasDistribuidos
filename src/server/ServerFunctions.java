@@ -1,4 +1,6 @@
 package server;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,5 +69,10 @@ public class ServerFunctions implements PartRepository{
 			sum += c;
 		}
 		return sum;
+	}
+
+	@Override
+	public String[] getServersList() throws RemoteException, MalformedURLException {
+		return Naming.list("//localhost:5000/");
 	}
 }
