@@ -1,3 +1,5 @@
+package client;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -5,49 +7,72 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import server.Part;
+import server.PartRepository;
+
 public class ClientFunctions {
 	
+	/**
+	 * Classe que trata as funcoes executadas pelo usuario. Nela, estao as referencias do servidor, de pecas correntes e subpecas. Eh aqui
+	 * tambem que se trata a interface do usuario com o programa cliente.
+	 * */
+	
+	/**
+	 * Guarda a referencia do servidor remoto corrente. Toda execucao de comando 'bind' este valor eh alterado
+	 * */
 	private PartRepository currentServer;
+	
+	/**
+	 * Referencia da peca corrente. Toda execucao do comando 'getp' troca o objeto corrente
+	 * */
 	private Part currentPart;
+	
+	/**
+	 * Lista de subpecas do cliente. Toda execucao do comando 'getp' adiciona um novo item a lista
+	 * */
 	private ArrayList<Part> currentSubParts;
+	
+	/**
+	 * Scanner utilizado na leitura dos comandos do usuario
+	 * */
 	private Scanner s;
 	
 	public ClientFunctions(Scanner scanner) {
 		this.s = scanner;
 		this.currentSubParts = new ArrayList<Part>();
+		this.currentPart = null;
 	};
 	
+	/**
+	 * Tratamento do comando digitado no console pelo usuario
+	 * @param cmd - Comando completo digitado pelo usuario
+	 * */
 	public boolean commandRouter(String cmd) {
-		String [] fullCommand = cmd.split(" ");
-		String [] args = null;
-		
-		if(fullCommand.length > 1){
-			args = fullCommand;
-		}
-		
-		cmd = fullCommand[0];
+		// Separo os comandos dos possiveis argumentos por espaco
+		String [] splittedCommand = cmd.split(" ");
+		cmd = splittedCommand[0];
 		
 		switch(cmd.toLowerCase()) {
 			case "help":
 				return help();
 			case "bind":
-				return bind(args);
+				return bind(splittedCommand);
 			case "servername":
 				return serverName();
 			case "listp":
 				return listp();
 			case "getp":
-				return getp(args);
+				return getp(splittedCommand);
 			case "showp":
 				return showp();
 			case "clearlist":
 				return clearlist();
 			case "addsubpart":
-				return addsubpart();
+				return addsubpart(splittedCommand);
 			case "addp":
-				return addp(args);
+				return addp(splittedCommand);
 			case "listsubp":
-				return listsubp(args);
+				return listsubp(splittedCommand);
 			case "quit":
 				return false;
 			default:
@@ -57,23 +82,29 @@ public class ClientFunctions {
 		
 	}
 	
+	/**
+	 * Imprime na tela para o usuario as descricoes dos comandos aceitos pelo programa
+	 * */
 	private boolean help() {
-		// TODO: Ta escrito que essa lista esta incompleta na descricao
 		System.out.printf(
 			"Os comandos disponiveis para acesso: \n" +
 			"\t bind [nome do server] - Conectar com um server ou mudar de server  \n" +
 			"\t serverName - Mostra o nome do servidor que esta conectado  \n" +
 			"\t listp - Lista as pecas do repositorio corrente  \n" +
-			"\t getp - Busca uma peca por codigo  \n" +
+			"\t getp [ID da peca] - Busca uma peca por codigo  \n" +
 			"\t showp - Mostra atributos da peca corrente  \n" +
 			"\t clearlist - Esvazia a lista de subpecas corrente  \n" +
-			"\t addsubpart - Adiciona a lista de subpecas corrente n unidades da peca corrente  \n" +
+			"\t listsubp - Lista as subpecas da peca corrente (sem os atributos mostrados em 'showp')  \n" +
+			"\t addsubpart [n copias] - Adiciona a lista de subpecas corrente n unidades da peca corrente  \n" +
 			"\t addp [nome] [descricao] [primitiva (sim/nao)] - Adiciona uma peca ao repositorio corrente. A lista de subpecas correntes e usada como lista de subcomponentes diretos da nova peca \n" +
 			"\t quit - Encerra a execucao do cliente"
 		);
 		return true;
 	}
 
+	/**
+	 * Troca a referencia de currentServer e se conecta em outro servidor
+	 * */
 	private boolean bind(String [] args) {
 		String serverName = "";
 		if(args == null || args.length == 1){
@@ -97,6 +128,9 @@ public class ClientFunctions {
 		return true;
 	}
 	
+	/**
+	 * Lista as subpecas da peca corrente
+	 * */
 	private boolean listsubp(String [] args){
 		int id = -1;
 		
@@ -137,6 +171,9 @@ public class ClientFunctions {
 		return true;
 	}
 	
+	/**
+	 * Adiciona uma nova peca ao servidor corrente
+	 * */
 	private boolean addp(String [] args) {
 		
 		String name = "";
@@ -183,17 +220,57 @@ public class ClientFunctions {
 		}	
 	}
 
-	private boolean addsubpart() {
-		// TODO Auto-generated method stub
+	/**
+	 * Adiciona n copias de pecas na lista de subpecas corrente
+	 * */
+	private boolean addsubpart(String [] args) {
+		int nParts = 0;
+		
+		if(args.length > 1){
+			try {
+				nParts = Integer.parseInt(args[1]);	
+			} catch (NumberFormatException ex){
+				System.err.println("Argumento n invalido!");
+				return false;
+			}
+		} else {
+			System.out.println("Quantas vezes voce deseja adicionar a peca corrente a lista de subpecas?");
+			while (!this.s.hasNextInt()) System.out.println("O valor inserido possui caracteres, por favor so utilize numeros");
+	    	nParts = this.s.nextInt();
+		}
+		
+		
+		if(nParts <= 0){
+			System.err.println("Valor invalido! Nenhuma peca sera adicionada a lista de subpecas");
+			// Nao ha a necessidade de retornar false nesse caso. Nao encerra o cliente.
+			return true;
+		}
+		
+		for(int i = 0; i < nParts; i++){
+			this.currentSubParts.add(this.currentPart);
+		}
+		
+		System.out.println("Agora, a lista de subpecas possui " + this.currentSubParts.size());
+		
 		return true;
 	}
 
+	/**
+	 * Limpa a lista de subpecas
+	 * */
 	private boolean clearlist() {
-		// TODO Auto-generated method stub
+		System.out.println("A lista de subpecas foi limpa.  Ela possuia " + this.currentSubParts.size());
+		this.currentSubParts.clear();
 		return true;
 	}
 
+	/**
+	 * Mostra os atributos da peca corrente
+	 * */
 	private boolean showp() {
+		if(this.currentPart == null)
+			System.err.println("Nao ha pecas correntes no cliente");
+		
 		System.out.println("*********Dados da peca corrente*********");
 		System.out.println("UID: " + this.currentPart.getUid());
 		System.out.println("Nome: " + this.currentPart.getName());
@@ -202,6 +279,9 @@ public class ClientFunctions {
 		return true;
 	}
 
+	/**
+	 * Retorna o nome do servidor corrente ao usuario
+	 * */
 	private boolean serverName() {
 		if (this.currentServer != null) {
 			try {
@@ -217,6 +297,9 @@ public class ClientFunctions {
 		return true;
 	}
 
+	/**
+	 * Recupera a peca de ID enviado para o usuario e insere como peca corrente do cliente
+	 * */
 	private boolean getp(String [] args) {
 		boolean stillSearch = true;
 		while (stillSearch) {
@@ -271,6 +354,10 @@ public class ClientFunctions {
 		return true;
 	}
 
+	
+	/**
+	 * Lista todas as pecas do servidor corrente
+	 * */
 	private boolean listp() {
 		try {
 			List<Part> parts = this.currentServer.getPartsList();

@@ -1,3 +1,4 @@
+package server;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class ServerFunctions implements PartRepository{
 
 	@Override
 	public Part AddPart(String name, String description) {		
-		Part newPart = new Part(this.partsList.size()+1, name, description);
+		Part newPart = new Part(this.generateUid(), name, description);
 		this.partsList.add(newPart);
 		return newPart;
 	}
@@ -56,5 +57,15 @@ public class ServerFunctions implements PartRepository{
 	@Override
 	public List<Part> getPartsList() throws RemoteException {
 		return this.partsList;
+	}
+	
+	private int generateUid(){
+		int sum = this.partsList.size() + 1;
+		char[] splittedString = this.serverName.toCharArray();
+		
+		for(char c : splittedString){
+			sum += c;
+		}
+		return sum;
 	}
 }
