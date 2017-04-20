@@ -7,6 +7,7 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.rmi.Naming;
 
 import server.Part;
 import server.PartRepository;
@@ -79,7 +80,7 @@ public class ClientFunctions {
 			case "quit":
 				return false;
 			default:
-				System.out.println("O comando " + cmd + "nao existe.");
+				System.out.println("O comando " + cmd + " nao existe.");
 				return help();
 		}
 		
@@ -87,11 +88,12 @@ public class ClientFunctions {
 	
 	private boolean listServers() {
 		try {
-			String [] servers = this.currentServer.getServersList();
-			System.out.println("Os servidores disponíveis");
+			String [] servers = Naming.list("localhost");
+			System.out.println("Servidores disponiveis:");
 			for (String s : servers) {
-				System.out.println(s);
+				System.out.println(s.substring(s.lastIndexOf("/") + 1));
 			}
+			return true;
 		} catch (Exception e) {
 			System.err.println("Client exception: " + e.toString());
 			e.printStackTrace();

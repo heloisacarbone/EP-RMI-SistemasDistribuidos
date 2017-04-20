@@ -71,8 +71,5 @@ public class ServerFunctions implements PartRepository{
 		return sum;
 	}
 
-	@Override
-	public String[] getServersList() throws RemoteException, MalformedURLException {
-		return Naming.list("//localhost:5000/");
-	}
+
 }
