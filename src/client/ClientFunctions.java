@@ -89,29 +89,35 @@ public class ClientFunctions {
 	}
 	
 	private boolean setup(){
-		try{
+		if(this.currentServer != null){
+			try{
 
-			Part p1 = this.currentServer.AddPart("peca exemplo 1 - primitiva", "Peca primitiva adicionada pelo setup");
-			Part p2 = this.currentServer.AddPart("peca exemplo 2 - primitiva", "Peca primitiva adicionada pelo setup");
-			Part p3 = this.currentServer.AddPart("peca exemplo 3 - primitiva", "Peca primitiva adicionada pelo setup");
-			
-			this.currentSubParts.add(p1);
-			this.currentSubParts.add(p2);
-			
-	
-			
-			Part p4 = this.currentServer.AddPart("peca exemplo 4 - nao primitiva", "Peca primitiva adicionada pelo setup");
-			this.currentServer.AddSubParts(p4, this.currentSubParts);
-			
-			this.currentSubParts.clear();
-			listp();
-		} catch (RemoteException e){
-			
-			e.printStackTrace();
-			return false;
-			
-		}
+				Part p1 = this.currentServer.AddPart("peca exemplo 1 - primitiva", "Peca primitiva adicionada pelo setup");
+				Part p2 = this.currentServer.AddPart("peca exemplo 2 - primitiva", "Peca primitiva adicionada pelo setup");
+				Part p3 = this.currentServer.AddPart("peca exemplo 3 - primitiva", "Peca primitiva adicionada pelo setup");
+				
+				this.currentSubParts.add(p1);
+				this.currentSubParts.add(p2);
+				
 		
+				
+				Part p4 = this.currentServer.AddPart("peca exemplo 4 - nao primitiva", "Peca adicionada pelo setup");
+				this.currentServer.AddSubParts(p4, this.currentSubParts);
+				
+				this.currentSubParts.clear();
+				listp();
+			} catch (RemoteException e){
+				
+				e.printStackTrace();
+				return false;
+				
+			}
+			
+		} else {
+			
+			System.out.println("Nenhum server conectado, nao eh possivel realizar o setup");
+		}
+
 		
 		
 		 return true;
@@ -142,6 +148,7 @@ public class ClientFunctions {
 			"\t serverName - Mostra o nome do servidor que esta conectado  \n" +
 			"\t listp - Lista as pecas do repositorio corrente  \n" +
 			"\t listservers - Lista os nomes dos servers \n" +
+			"\t setup - Adiciona pecas iniciais \n" +
 			"\t getp [ID da peca] - Busca uma peca por codigo  \n" +
 			"\t showp - Mostra atributos da peca corrente  \n" +
 			"\t clearlist - Esvazia a lista de subpecas corrente  \n" +
@@ -183,42 +190,47 @@ public class ClientFunctions {
 	 * Lista as subpecas da peca corrente
 	 * */
 	private boolean listsubp(String [] args){
-		int id = -1;
-		
-		if(args.length > 1) {
-			try{
-				id = Integer.parseInt(args[1]);
-			} catch(NumberFormatException ex){
-				System.err.println("Argumento UID invalido!");
+		if(this.currentServer != null){
+			int id = -1;
+			
+			if(args.length > 1) {
+				try{
+					id = Integer.parseInt(args[1]);
+				} catch(NumberFormatException ex){
+					System.err.println("Argumento UID invalido!");
+					return false;
+				}
+			} else {
+				System.out.println("Qual peca deseja buscar ? (id)");
+				while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
+		    	id = this.s.nextInt();
+			}
+			
+			try {
+				Part part = this.currentServer.getPartByUID(id);
+				ArrayList<Part> subParts = part.getSubParts();
+				
+				if(subParts.isEmpty()){
+					System.out.println("A peca " + part.getName() + " nao possui subpecas");
+				} else {
+					System.out.println("Peca " + part.getName() + ":");
+					System.out.println("id      |     nome     |      descricao   ");
+					for (Part p : subParts) {
+						String info = p.getUid()  +  "    |    " + p.getName() +  "    |    " + p.getDescription();
+						System.out.println(info);
+					}
+				}
+				
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				
 				return false;
 			}
-		} else {
-			System.out.println("Qual peca deseja buscar ? (id)");
-			while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
-	    	id = this.s.nextInt();
+			
+		}else {
+			System.out.println("Nenhum servidor conectado, nao e possivel listar sub pecas");
 		}
-		
-		try {
-			Part part = this.currentServer.getPartByUID(id);
-			ArrayList<Part> subParts = part.getSubParts();
-			
-			if(subParts.isEmpty()){
-				System.out.println("A peca " + part.getName() + " nao possui subpecas");
-			} else {
-				System.out.println("Peca " + part.getName() + ":");
-				System.out.println("id      |     nome     |      descricao   ");
-				for (Part p : subParts) {
-					String info = p.getUid()  +  "    |    " + p.getName() +  "    |    " + p.getDescription();
-					System.out.println(info);
-				}
-			}
-			
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			
-			return false;
-		}
-		
+	
 		return true;
 	}
 	
@@ -227,54 +239,65 @@ public class ClientFunctions {
 	 * */
 	private boolean addp(String [] args) {
 		
-		String name = "";
-		
-		if(args.length > 1){
-			name = args[1];
-		} else {
-			System.out.println("Por favor, digite o nome da nova peca primitiva:");
-			name = this.s.nextLine();
-		}
-		
-		String description = "";
-		if(args.length > 2) {
-			description = args[2];
-		} else {
-			System.out.println("Digite a descricao da nova peca " + name + ":");
-			description = this.s.nextLine();	
-		}
-		
-		String primitive = "";
-		if(args.length > 3){
-			primitive = args[3];
-		} else {
-			System.out.println("A peca " + name + " eh primitiva?");
-			primitive = this.s.nextLine();
-		}
-
-		try {
-			Part p = this.currentServer.AddPart(name, description);
-			if(primitive.toLowerCase().contains("sim")) {
-				System.out.println("Peca primitiva " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());
+		if(this.currentServer != null){
+			String name = "";
+			
+			if(args.length > 1){
+				name = args[1];
 			} else {
-				if(this.currentSubParts.size() == 0) {
-					System.out.println("Voce nao tem pecas a serem adicionadas como subpecas. Peca adicionada no repositorio sem subpecas.");
-				} else {
-					this.currentServer.AddSubParts(p, this.currentSubParts);
-					System.out.println("Peca com subpecas " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());	
-				}
+				System.out.println("Por favor, digite o nome da nova peca primitiva:");
+				name = this.s.nextLine();
 			}
+			
+			String description = "";
+			if(args.length > 2) {
+				description = args[2];
+			} else {
+				System.out.println("Digite a descricao da nova peca " + name + ":");
+				description = this.s.nextLine();	
+			}
+			
+			String primitive = "";
+			if(args.length > 3){
+				primitive = args[3];
+			} else {
+				System.out.println("A peca " + name + " eh primitiva?");
+				primitive = this.s.nextLine();
+			}
+
+			try {
+				Part p = this.currentServer.AddPart(name, description);
+				if(primitive.toLowerCase().contains("sim")) {
+					System.out.println("Peca primitiva " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());
+				} else {
+					if(this.currentSubParts.size() == 0) {
+						System.out.println("Voce nao tem pecas a serem adicionadas como subpecas. Peca adicionada no repositorio sem subpecas.");
+					} else {
+						this.currentServer.AddSubParts(p, this.currentSubParts);
+						System.out.println("Peca com subpecas " + name + " adicionada com sucesso! Seu uid eh: " + p.getUid());	
+					}
+				}
+				return true;
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				return false;
+			}
+		} else {
+			System.out.println("Nenhum servidor conectado, nao eh possivel adicionar peca");
 			return true;
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return false;
-		}	
+		}
+		
 	}
 
 	/**
 	 * Adiciona n copias de pecas na lista de subpecas corrente
 	 * */
 	private boolean addsubpart(String [] args) {
+		if(this.currentPart == null){
+			System.out.println("Nenhuma peca selecionada");
+			return true;
+			
+		}
 		int nParts = 0;
 		
 		if(args.length > 1){
@@ -300,7 +323,7 @@ public class ClientFunctions {
 		for(int i = 0; i < nParts; i++){
 			this.currentSubParts.add(this.currentPart);
 		}
-		
+
 		System.out.println("Agora, a lista de subpecas possui " + this.currentSubParts.size());
 		
 		return true;
@@ -319,14 +342,19 @@ public class ClientFunctions {
 	 * Mostra os atributos da peca corrente
 	 * */
 	private boolean showp() {
-		if(this.currentPart == null)
-			System.err.println("Nao ha pecas correntes no cliente");
-		
-		System.out.println("*********Dados da peca corrente*********");
-		System.out.println("UID: " + this.currentPart.getUid());
-		System.out.println("Nome: " + this.currentPart.getName());
-		System.out.println("Descricao: " + this.currentPart.getDescription());
-		System.out.println("****************************************");
+		if(this.currentServer != null){
+			if(this.currentPart == null)
+				System.err.println("Nao ha pecas correntes no cliente");
+			
+			System.out.println("*********Dados da peca corrente*********");
+			System.out.println("UID: " + this.currentPart.getUid());
+			System.out.println("Nome: " + this.currentPart.getName());
+			System.out.println("Descricao: " + this.currentPart.getDescription());
+			System.out.println("****************************************");
+			
+		}else {
+			System.out.println("Nenhum servidor conectado, nao eh possivel mostrar peca");
+		}
 		return true;
 	}
 
@@ -352,55 +380,60 @@ public class ClientFunctions {
 	 * Recupera a peca de ID enviado para o usuario e insere como peca corrente do cliente
 	 * */
 	private boolean getp(String [] args) {
-		boolean stillSearch = true;
-		while (stillSearch) {
-			int id = -1;
-			if(args.length > 1){
-				try{
-					id = Integer.parseInt(args[1]);	
-				} catch (NumberFormatException ex){
-					System.err.println("Argumento UID invalido!");
-					return false;
+		if(this.currentServer != null){
+			boolean stillSearch = true;
+			while (stillSearch) {
+				int id = -1;
+				if(args.length > 1){
+					try{
+						id = Integer.parseInt(args[1]);	
+					} catch (NumberFormatException ex){
+						System.err.println("Argumento UID invalido!");
+						return false;
+					}
+					
+				} else {
+					System.out.println("Qual peca deseja buscar ? (id)");
+					while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
+			    	id = this.s.nextInt();	
 				}
 				
-			} else {
-				System.out.println("Qual peca deseja buscar ? (id)");
-				while (!this.s.hasNextInt()) System.out.println("O codigo inserido possui caracteres, por favor so utilize numeros");
-		    	id = this.s.nextInt();	
+				try {
+		            this.currentPart = this.currentServer.getPartByUID(id);
+		            if (this.currentPart == null) {
+		            	boolean validOption = true;
+		            	System.out.println("O id nao retornou nenhuma peca. Deseja buscar por outro id ?");
+		            	while(validOption) {
+		            		validOption = false;
+		            		System.out.println("sim ou nao");
+		            		String option = this.s.nextLine().toLowerCase();
+			            	switch(option) {
+			            		case "sim":
+			            			stillSearch = true;
+			            			break;
+			            		case "nao":
+			            			stillSearch = false;
+			            			break;
+			            		default:
+			            			System.out.println("A opcao escolhida nao esta na lista.");
+			            			validOption = true;
+		 	            	}
+		            	}
+		            } else {
+		            	System.out.println("A peca corrente e " + this.currentPart.getName());
+		            	this.currentSubParts.add(this.currentPart);
+		            	stillSearch = false;
+		            }
+		            
+		        } catch (Exception e) {
+		            System.err.println("Client exception: " + e.toString());
+		            e.printStackTrace();
+		        }
 			}
-			
-			try {
-	            this.currentPart = this.currentServer.getPartByUID(id);
-	            if (this.currentPart == null) {
-	            	boolean validOption = true;
-	            	System.out.println("O id nao retornou nenhuma peca. Deseja buscar por outro id ?");
-	            	while(validOption) {
-	            		validOption = false;
-	            		System.out.println("sim ou nao");
-	            		String option = this.s.nextLine().toLowerCase();
-		            	switch(option) {
-		            		case "sim":
-		            			stillSearch = true;
-		            			break;
-		            		case "nao":
-		            			stillSearch = false;
-		            			break;
-		            		default:
-		            			System.out.println("A opcao escolhida nao esta na lista.");
-		            			validOption = true;
-	 	            	}
-	            	}
-	            } else {
-	            	System.out.println("A peca corrente e " + this.currentPart.getName());
-	            	this.currentSubParts.add(this.currentPart);
-	            	stillSearch = false;
-	            }
-	            
-	        } catch (Exception e) {
-	            System.err.println("Client exception: " + e.toString());
-	            e.printStackTrace();
-	        }
+		} else {
+			System.out.println("Nenhum server conectado, nao eh possivel selecionar peca");
 		}
+		
 		
 		return true;
 	}
@@ -410,18 +443,23 @@ public class ClientFunctions {
 	 * Lista todas as pecas do servidor corrente
 	 * */
 	private boolean listp() {
-		try {
-			List<Part> parts = this.currentServer.getPartsList();
-			System.out.println("id      |     nome     |      descricao   ");
-			for (Part p : parts) {
-				String info = p.getUid()  +  "    |    " + p.getName() +  "    |    " + p.getDescription();
-				System.out.println(info);
-			}
-			System.out.println("Para ver mais detalhes de alguma das pecas utilize o comando 'showp'");
-		} catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
-        }
+		if(this.currentServer != null){
+			try {
+				List<Part> parts = this.currentServer.getPartsList();
+				System.out.println("id      |     nome     |      descricao   ");
+				for (Part p : parts) {
+					String info = p.getUid()  +  "    |    " + p.getName() +  "    |    " + p.getDescription();
+					System.out.println(info);
+				}
+				System.out.println("Para ver mais detalhes de alguma das pecas utilize o comando 'showp'");
+			} catch (Exception e) {
+	            System.err.println("Client exception: " + e.toString());
+	            e.printStackTrace();
+	        }
+		} else {
+			System.out.println("Nenhum server conectado, nao eh possivel listar pecas");
+		}
+		
 	
 		return true;
 	}
