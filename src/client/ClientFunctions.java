@@ -20,7 +20,7 @@ public class ClientFunctions {
 	 * */
 	
 	/**
-	 * Guarda a referencia do servidor remoto corrente. Toda execucao de comando 'bind' este valor eh alterado
+	 * Guarda a referencia do servidor remoto atual. Toda execucao de comando 'bind' este valor eh alterado
 	 * */
 	private PartRepository currentServer;
 	
@@ -77,6 +77,8 @@ public class ClientFunctions {
 				return addp(splittedCommand);
 			case "listsubp":
 				return listsubp(splittedCommand);
+			case "setup":
+				return setup();
 			case "quit":
 				return false;
 			default:
@@ -84,6 +86,35 @@ public class ClientFunctions {
 				return help();
 		}
 		
+	}
+	
+	private boolean setup(){
+		try{
+
+			Part p1 = this.currentServer.AddPart("peca exemplo 1 - primitiva", "Peca primitiva adicionada pelo setup");
+			Part p2 = this.currentServer.AddPart("peca exemplo 2 - primitiva", "Peca primitiva adicionada pelo setup");
+			Part p3 = this.currentServer.AddPart("peca exemplo 3 - primitiva", "Peca primitiva adicionada pelo setup");
+			
+			this.currentSubParts.add(p1);
+			this.currentSubParts.add(p2);
+			
+	
+			
+			Part p4 = this.currentServer.AddPart("peca exemplo 4 - nao primitiva", "Peca primitiva adicionada pelo setup");
+			this.currentServer.AddSubParts(p4, this.currentSubParts);
+			
+			this.currentSubParts.clear();
+			listp();
+		} catch (RemoteException e){
+			
+			e.printStackTrace();
+			return false;
+			
+		}
+		
+		
+		
+		 return true;
 	}
 	
 	private boolean listServers() {
