@@ -70,6 +70,4 @@ public class ServerFunctions implements PartRepository{
 		}
 		return sum;
 	}
-
-
 }

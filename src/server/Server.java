@@ -1,4 +1,5 @@
 package server;
+import java.io.IOException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -13,9 +14,33 @@ public class Server {
 		startServer();
 	}
 
+	private static void runRMI(){
+		
+		Runtime rt = Runtime.getRuntime();
+		try {
+			
+			Process result = rt.exec("cd bin");
+			result = rt.exec("rmiregistry");
+			if(!result.isAlive()){
+				int exitVal = result.exitValue();
+				System.out.println("Running rmiRegistry" + exitVal);	
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private static void startServer() {
+		//runRMI();
+        
+		
 		Scanner s = new Scanner(System.in);
 		String serverName = s.nextLine();
+		
+		
 		
 		try {
             ServerFunctions obj = new ServerFunctions();

@@ -39,6 +39,9 @@ public class ClientFunctions {
 	 * */
 	private Scanner s;
 	
+	private static final int SETUP_PRIMITIVE_PARTS = 10;
+	private static final int SETUP_NON_PRIMITIVE_PARTS = 10;
+	
 	public ClientFunctions(Scanner scanner) {
 		this.s = scanner;
 		this.currentSubParts = new ArrayList<Part>();
@@ -91,18 +94,17 @@ public class ClientFunctions {
 	private boolean setup(){
 		if(this.currentServer != null){
 			try{
-
-				Part p1 = this.currentServer.AddPart("peca exemplo 1 - primitiva", "Peca primitiva adicionada pelo setup");
-				Part p2 = this.currentServer.AddPart("peca exemplo 2 - primitiva", "Peca primitiva adicionada pelo setup");
-				Part p3 = this.currentServer.AddPart("peca exemplo 3 - primitiva", "Peca primitiva adicionada pelo setup");
+				Part p = null;
 				
-				this.currentSubParts.add(p1);
-				this.currentSubParts.add(p2);
+				for(int i = 0; i < SETUP_PRIMITIVE_PARTS; i++){
+					p = this.currentServer.AddPart("peca_primitiva_exemplo_" + (i + 1), "descricao_peca_primitiva_" + (i + 1));
+					this.currentSubParts.add(p);
+				}
 				
-		
-				
-				Part p4 = this.currentServer.AddPart("peca exemplo 4 - nao primitiva", "Peca adicionada pelo setup");
-				this.currentServer.AddSubParts(p4, this.currentSubParts);
+				for (int i = 0; i < SETUP_NON_PRIMITIVE_PARTS; i++){
+					p = this.currentServer.AddPart("peca_exemplo_nao_primitiva" + i, "descricao_peca_nao_primitiva_" + (i + 1));
+					this.currentServer.AddSubParts(p, this.currentSubParts);
+				}
 				
 				this.currentSubParts.clear();
 				listp();
@@ -110,16 +112,11 @@ public class ClientFunctions {
 				
 				e.printStackTrace();
 				return false;
-				
 			}
-			
-		} else {
-			
+		} else {			
 			System.out.println("Nenhum server conectado, nao eh possivel realizar o setup");
 		}
 
-		
-		
 		 return true;
 	}
 	
