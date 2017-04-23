@@ -343,13 +343,24 @@ public class ClientFunctions {
 	 * */
 	private boolean showp() {
 		if(this.currentServer != null){
-			if(this.currentPart == null)
+			if(this.currentPart == null){
 				System.err.println("Nao ha pecas correntes no cliente");
+				return true;
+			}
 			
 			System.out.println("*********Dados da peca corrente*********");
 			System.out.println("UID: " + this.currentPart.getUid());
 			System.out.println("Nome: " + this.currentPart.getName());
 			System.out.println("Descricao: " + this.currentPart.getDescription());
+			if(this.currentPart.getSubParts().size() > 0) {
+				System.out.println("--- Lista de IDs de subpecas de " + this.currentPart.getName());
+				for(int i = 0; i < this.currentPart.getSubParts().size(); i++){
+					System.out.println(this.currentPart.getSubParts().get(i).getUid());
+				}
+			} else {
+				System.out.println("Esta peca nao possui subpartes");
+			}
+			
 			System.out.println("****************************************");
 			
 		}else {
